@@ -17,6 +17,8 @@ Then install the dependencies:
 ```
 (venv)$ pip install -r requirements.txt
 ```
+Create __.env__ file and grab data from __.env.dist__ with own filling
+
 Once pip has finished downloading the dependencies:
 ```
 (venv)$ cd games
