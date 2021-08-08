@@ -2,6 +2,12 @@
 ### Setup
 ___
 
+The first thing to do is to clone the repository:
+
+```
+git clone https://github.com/Artemooon/h_drf.git
+cd h_drf
+```
 Create a virtual environment to install dependencies in and activate it:
 ```
 virtualenv .venv
@@ -15,7 +21,8 @@ Once pip has finished downloading the dependencies:
 ```
 (venv)$ cd games
 (venv)$ python manage.py migrate
-(venv)$ python manage.py runserver
+(venv)$ python manage.py runserver 8000
 ```
 Navigate for swagger [http://127.0.0.1:8000/swagger/](http://127.0.0.1:8000/swagger/) 
+
 Also there are redoc [http://127.0.0.1:8000/redoc/](http://127.0.0.1:8000/redoc/) 
