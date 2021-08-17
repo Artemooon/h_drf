@@ -2,9 +2,13 @@
 *.pot
 *.pyc
 __pycache__
-db.sqlite3
+#db.sqlite3
 media
 .env
+.dockerignore
+logs
+/static
+/postgres-data
 
 .idea/**/workspace.xml
 .idea/**/tasks.xml
