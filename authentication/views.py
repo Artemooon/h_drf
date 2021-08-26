@@ -1,9 +1,10 @@
 import logging
 
+import jwt
 from django.contrib.auth import get_user_model
+from django.conf import settings
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
-from rest_auth.models import TokenModel
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import generics
 from rest_framework import permissions
 from rest_framework import status
@@ -27,26 +28,44 @@ class RegisterUser(generics.GenericAPIView):
         if serializer.is_valid():
             serializer.save()
             new_user = User.objects.get(id=serializer.data['id'])
-            new_user_token = TokenModel.objects.create(user=new_user)
-            send_activation_mail(request, new_user, new_user_token.key)
+            new_user_token = RefreshToken.for_user(new_user).access_token
+            send_activation_mail(request, new_user, new_user_token)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-def activate_account(request, token):
-    user = get_object_or_404(TokenModel, key=token)
-    if user:
-        user.is_active = True
-        user.save()
-        return HttpResponse('Thank you for your email confirmation. You already logged in!')
+class ActivateAccount(generics.GenericAPIView):
+    permission_classes = [permissions.AllowAny, ]
 
-    return HttpResponse('Activation link is invalid!')
+    def get(self, request, token):
+
+        try:
+            decode_token = jwt.decode(token, settings.SECRET_KEY,  algorithms=["HS256"])
+        except jwt.DecodeError:
+            return Response({'message': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(id=decode_token['user_id'])
+            if user:
+                user.is_active = True
+                user.save()
+                return Response({'Thank you for your email confirmation!'}, status=status.HTTP_200_OK)
+
+            return Response({'Activation link is invalid!'}, status=status.HTTP_200_OK)
+
+        except jwt.exceptions.ExpiredSignatureError:
+            return Response({'Activation link expired'}, status=status.HTTP_408_REQUEST_TIMEOUT)
+        except jwt.exceptions.InvalidTokenError:
+            return Response({'Invalid activation link'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class Logout(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        request.user.auth_token.delete()
+        refresh_token = request.data["refresh"]
+        token = RefreshToken(refresh_token)
+        token.blacklist()
+
         return Response({"detail": "Successfully logged out."}, status=status.HTTP_200_OK)

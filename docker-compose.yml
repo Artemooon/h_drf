@@ -8,15 +8,14 @@ services:
     restart: always
     env_file:
       - .env
-    command: gunicorn games.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - ./:/app
       - static:/static
     ports:
       - "8000:8000"
     depends_on:
-      - db
       - redis
+      - db
 
   nginx:
     build:
@@ -44,12 +43,12 @@ services:
       - POSTGRES_DB=${SQL_DATABASE}
 
   redis:
-    image: redis:latest
-    restart: always
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
+      image: redis:latest
+      restart: always
+      environment:
+        - REDIS_HOST=redis
+      volumes:
+        - redis_data:/data
 
 volumes:
   postgres_data:

@@ -1,25 +1,28 @@
 FROM python:3.8
 
-WORKDIR /app
+RUN mkdir app/
+WORKDIR /app/
 
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# copy project
-COPY . .
 
 # install dependencies
+
+COPY poetry.lock pyproject.toml /app/
 
 RUN pip install --upgrade pip && \
     pip install poetry && \
     poetry config virtualenvs.create false && \
-    poetry install --no-dev
+    poetry install
 
-COPY ./entrypoint.sh /
+# copy project
 
+COPY . .
 
-ENTRYPOINT ["sh", "/entrypoint.sh"]
+#
+ENTRYPOINT ["sh", "entrypoint.sh"]
 
 
 
