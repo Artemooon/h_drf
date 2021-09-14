@@ -9,6 +9,8 @@ media
 logs
 /static
 /postgres-data
+/games/games/.pytest_cache
+/.pytest_cache/
 
 .idea/**/workspace.xml
 .idea/**/tasks.xml
