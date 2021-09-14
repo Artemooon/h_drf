@@ -1,34 +1,59 @@
 version: "3.3"
 
 services:
-  web:
+  djangoapp:
     build:
       context: .
       dockerfile: Dockerfile
+    command: "gunicorn  games.games.wsgi:application --bind :8000"
     restart: always
     env_file:
       - .env
     volumes:
       - ./:/app
       - static:/static
-    ports:
-      - "8000:8000"
     depends_on:
       - redis
       - db
 
-  nginx:
+  celery:
     build:
       context: .
-      dockerfile: nginx/Dockerfile
-    ports:
-      - "80:80"
+      dockerfile: Dockerfile
+    command: "celery -A games.games.celery worker --loglevel=INFO"
     volumes:
       - .:/app
-      - ./static/:/static
-    restart: on-failure
     depends_on:
-      - web
+      - redis
+      - db
+    env_file:
+      - .env
+
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: "celery -A games.games.celery -B --loglevel=INFO"
+    volumes:
+      - .:/app
+    depends_on:
+        - redis
+        - db
+    env_file:
+      - .env
+
+#  nginx:
+#    build:
+#      context: nginx
+#      dockerfile: Dockerfile
+#    ports:
+#      - "80:80"
+#    volumes:
+#      - .:/app
+#      - ./static/:/static
+#    restart: on-failure
+#    depends_on:
+#      - djangoapp
 
   db:
     image: postgres:12-alpine
@@ -41,6 +66,8 @@ services:
       - POSTGRES_USER=${SQL_USER}
       - POSTGRES_PASSWORD=${SQL_PASSWORD}
       - POSTGRES_DB=${SQL_DATABASE}
+    ports:
+      - "5432:5432"
 
   redis:
       image: redis:latest
