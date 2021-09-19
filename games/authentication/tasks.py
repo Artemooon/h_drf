@@ -16,11 +16,12 @@ def send_activation_mail(current_domain, user_id, confirm_url):
                                  'current_domain': current_domain})
     email = EmailMessage(mail_subject, msg_html, to=[user.email])
     email.send()
-
+    return email.to
 
 @celery.task
 def send_weekly_reminder_confirm_email():
     all_users = weekly_reminder_confirmation_email()
-    if all_users is not None:
-        for send_user in all_users:
-            send_user.send()
+    if all_users:
+        for user in all_users:
+            user.send()
+    return 'Successfully send'

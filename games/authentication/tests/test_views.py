@@ -36,9 +36,8 @@ class AuthenticationTest(APITestCase):
             "password": "weron123",
             "confirm_password": "weron123"
         }
-        response = self.client.post(url, body_data, format='json')
+        self.client.post(url, body_data, format='json')
 
-        self.confirm_url = response.data['confirm_url_token']
 
     def test_register_new_user(self):
         body_data = {
@@ -186,10 +185,3 @@ class AuthenticationTest(APITestCase):
 
         assert response.status_code == status.HTTP_200_OK
 
-    def test_account_activate_success(self):
-        self.register_user()
-        url = self.confirm_url
-
-        response = self.client.get(url, format='json')
-
-        assert response.status_code == status.HTTP_200_OK

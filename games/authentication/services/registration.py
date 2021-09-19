@@ -1,4 +1,3 @@
-import jwt
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from rest_framework import status
@@ -19,27 +18,21 @@ def register_new_user(serializer_data):
     current_domain = current_site.domain
 
     send_activation_mail.delay(current_domain, new_user.id, confirm_url_token)
-    registered_user_dict = {'user': serializer_data, 'confirm_url_token': confirm_url_token}
+    registered_user_dict = {'user': serializer_data}
 
     return registered_user_dict
 
 
 def activate_user_account(decoded_token):
-    try:
-        user = User.objects.get(id=decoded_token['user_id'])
-        if user:
-            user.is_active = True
-            user.is_reminder_notified = True
-            user.save()
-            return Response({'message': 'Thank you for your email confirmation!'}, status=status.HTTP_200_OK)
+    user = User.objects.filter(id=decoded_token['user_id'])
+    if user.exists():
+        user = user.first()
+        user.is_active = True
+        user.is_reminder_notified = True
+        user.save()
+        return Response({'message': 'Thank you for your email confirmation!'}, status=status.HTTP_200_OK)
 
-        return Response({'message': 'Activation link is invalid!'}, status=status.HTTP_200_OK)
-
-    except jwt.exceptions.ExpiredSignatureError:
-        return Response({'message': 'Activation link expired'}, status=status.HTTP_408_REQUEST_TIMEOUT)
-
-    except jwt.exceptions.InvalidTokenError:
-        return Response({'message': 'Invalid activation link'}, status=status.HTTP_400_BAD_REQUEST)
+    return Response({'message': 'Activation link is invalid!'}, status=status.HTTP_200_OK)
 
 
 def move_refresh_token_to_blacklist(refresh_token):

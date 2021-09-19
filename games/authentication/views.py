@@ -42,6 +42,8 @@ class ActivateAccount(generics.GenericAPIView):
             decode_token = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
         except jwt.DecodeError:
             return Response({'message': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
+        except jwt.exceptions.ExpiredSignatureError:
+            return Response({'message': 'Activation link expired'}, status=status.HTTP_408_REQUEST_TIMEOUT)
 
         return activate_user_account(decode_token)
 
