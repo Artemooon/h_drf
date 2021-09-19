@@ -3,6 +3,7 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/games/.pytest_cache/v" />
+      <excludeFolder url="file://$MODULE_DIR$/.idea/dataSources" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.8 (games-api-nW5_qOcY-py3.8)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
