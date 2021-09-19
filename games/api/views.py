@@ -1,41 +1,32 @@
-from django.shortcuts import get_object_or_404
+import django_filters
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
+from rest_framework import filters
 from rest_framework import generics
 from rest_framework import permissions
 from rest_framework import status
 from rest_framework.response import Response
 
 from .models import Game, Creator, GameCategory
-from .services.crud_operations import create_new_game, get_games_by_category
 from .serializers import GameSerializer, CreatorSerializer, GameCategorySerializer
+from .services.crud_operations import create_new_game, get_games_by_category
 
 CACHE_TTL = 60
 
 
 class GameList(generics.ListCreateAPIView):
-    queryset = Game.objects.all().order_by('-create_date')
+    queryset = Game.objects.all()
     serializer_class = GameSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['^name', '=id']
+    ordering_fields = ['name', 'id']
 
     @method_decorator(cache_page(CACHE_TTL))
     @method_decorator(vary_on_cookie)
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
-
-    def create(self, request, *args, **kwargs):
-        serializer = GameSerializer(data=request.data)
-
-        if serializer.is_valid():
-            data = request.data
-
-            new_game = create_new_game(data)
-
-            serializer = GameSerializer(new_game)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class GameDetails(generics.RetrieveUpdateDestroyAPIView):
@@ -51,7 +42,10 @@ class GameDetails(generics.RetrieveUpdateDestroyAPIView):
 class CreatorsList(generics.ListCreateAPIView):
     queryset = Creator.objects.all().order_by('name')
     serializer_class = CreatorSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['^name', '=rating']
+    ordering_fields = ['name', 'rating']
 
     @method_decorator(cache_page(CACHE_TTL * 2))
     @method_decorator(vary_on_cookie)
@@ -72,7 +66,10 @@ class CreatorDetails(generics.RetrieveUpdateDestroyAPIView):
 class GameCategoryList(generics.ListCreateAPIView):
     queryset = GameCategory.objects.all().order_by('category_name')
     serializer_class = GameCategorySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['^category_name', 'slug']
+    ordering_fields = ['name', 'id']
 
     @method_decorator(cache_page(CACHE_TTL * 2))
     @method_decorator(vary_on_cookie)
@@ -94,6 +91,9 @@ class GamesByCategory(generics.ListAPIView):
     serializer_class = GameSerializer
     permission_classes = [permissions.IsAuthenticated]
     lookup_url_kwarg = "category"
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['^name', '=id']
+    ordering_fields = ['name', 'id', 'rating']
 
     def get_queryset(self):
         slug_ = self.kwargs.get(self.lookup_url_kwarg)

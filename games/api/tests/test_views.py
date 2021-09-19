@@ -1,11 +1,10 @@
 import pytest
+from api.models import Game, Creator, GameCategory
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.utils.text import slugify
 from rest_framework import status
 from rest_framework.test import APITestCase
-
-from ..models import Game, Creator, GameCategory
 
 User = get_user_model()
 
@@ -35,11 +34,6 @@ class ApiCRUDTest(APITestCase):
         response = self.client.post(url, body, format='json')
 
         self.access_token = response.data['access']
-
-    def test_unauthorized_request(self):
-        url = reverse('game_list')
-        response = self.client.get(url)
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_get_games_list(self):
         self.authorize_user()
@@ -76,7 +70,7 @@ class ApiCRUDTest(APITestCase):
         self.client.force_authenticate(self.new_user)
 
         body_data = {
-            "name": "GTA5",
+            "name": "GTA6",
             "description": "Best game",
             "rating": 30,
             "logo_url": "https://stackoverflow.com/",
@@ -85,8 +79,8 @@ class ApiCRUDTest(APITestCase):
 
         response = self.client.post(reverse('game_list'), body_data, format='json')
 
-        assert response.status_code == status.HTTP_200_OK
-        assert response.data['name'] == 'GTA5'
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data['name'] == 'GTA6'
         assert isinstance(response.data['id'], int)
 
     def test_create_creator_with_error(self):

@@ -21,8 +21,6 @@ def weekly_reminder_confirmation_email():
     current_site = Site.objects.get(id=1)
     current_domain = current_site.domain
 
-    email = None
-
     for user in all_users:
         user.is_reminder_notified = True
         user.save()

@@ -2,16 +2,18 @@
 *.pot
 *.pyc
 __pycache__
-#db.sqlite3
-media
+
 .env
 .dockerignore
 logs
-/static
 /postgres-data
 /games/games/.pytest_cache
-/.pytest_cache/
+/.pytest_cache
 
+.coverage
+
+/.idea
+.idea
 .idea/**/workspace.xml
 .idea/**/tasks.xml
 .idea/dictionaries
@@ -43,3 +45,6 @@ lib64/
 parts/
 sdist/
 var/
+/games/static/
+/games/celerybeat-schedule
+/games/postgres-data
