@@ -23,6 +23,7 @@ flower = "^1.0.0"
 coverage = "^5.5"
 Faker = "^8.13.2"
 django-filter = "^2.4.0"
+better-profanity = "^0.7.0"
 
 
 [tool.poetry.dev-dependencies]
