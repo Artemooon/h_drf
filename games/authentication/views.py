@@ -50,6 +50,7 @@ class ActivateAccount(generics.GenericAPIView):
 
 class Logout(generics.GenericAPIView, BaseView,):
     permission_classes = [permissions.IsAuthenticated]
+    serializer_class = None
 
     def post(self, request):
         try:
